@@ -1,0 +1,151 @@
+$directory=".\"
+$extension="*.xml"
+$output_json = "c:\temp\JSONOutput.json"
+
+
+"" | Set-Content -encoding ASCII $output_json
+
+$directory_list = Get-ChildItem $directory -filter $extension
+
+foreach ( $file in $directory_list )
+{
+   [xml]$content = Get-Content -encoding ASCII ( $directory + $file.Name )
+   $acc_name=$file.Name.substring(0,3)
+   $server_obj_list = @{}
+
+   foreach ( $server in $content.serverGroup.server )
+   {
+	   $server_name = $server.name
+	   $monitor_list = $server.monitor
+
+	   foreach ( $monitor in $monitor_list )
+	   {
+		  $param_list = $monitor.param
+		  foreach ( $param in $param_list )
+		  {
+			 $param_name = $param.name
+			 $inst_list = $param.instance
+
+			 foreach ( $inst in $inst_list )
+		     {
+			    $instance_name = $inst.name
+				$instance_name = $instance_name -Replace '\s+|`n|`t|`r'
+
+			    if ( $instance_name -eq "" )
+			    {
+				   continue
+			    }
+
+
+			    #$threshold_obj = $inst.setting | foreach { if ( $_.Name -eq "THRESHOLDS" ){ $_ } else { "" } }
+			    $threshold_obj = $inst.setting[0]
+
+			    if ( $threshold_obj.Name -ne "THRESHOLDS" )
+			    {
+			       continue
+			    }
+
+			    $status = $inst.setting[0].var.'#text'
+
+		    	if ( $status -eq "No" )
+			    {
+				   continue
+			    }
+
+			    foreach ( $group in $threshold_obj.group )
+			    {
+				   $group_name = 	$group.name
+				   $var_list = $group.var
+
+				   if ( $var_list[1].'#text' -eq "Yes" )
+				   {
+					  $severity = $var_list[0].'#text'
+					  $max_range = $var_list[4].'#text'
+					  $min_range = $var_list[5].'#text'
+					  $iterations = $var_list[2].'#text'
+
+					  $key = $server_name + "," + $monitor.name + "," + $param_name + "," + $instance_name
+
+					  if ( !( $server_obj_list.containsKey( $key ) ) )
+					  {
+					     $tmp = New-Object -TypeName PSObject
+						 $tmp | Add-Member -MemberType NoteProperty -Name Warning -Value "NA-NA"
+						 $tmp | Add-Member -MemberType NoteProperty -Name Alarm -Value "NA-NA"
+
+						 if ( $severity -eq "Warning" )
+						 {
+						     $tmp.Warning = $min_range + "-" + $max_range
+						 }
+						 elseif ( $severity -eq "Alarm" )
+						 {
+						    $tmp.Alarm = $min_range + "-" + $max_range
+						 }
+
+						 $server_obj_list[ $key ] = $tmp
+					}
+					else
+					{
+						if ( $severity -eq "Warning" )
+						{
+						   ( $server_obj_list[ $key ] ).Warning = $min_range + "-" + $max_range
+						}
+						elseif ( $severity -eq "Alarm" )
+						{
+						   ( $server_obj_list[ $key ] ).Alarm = $min_range + "-" + $max_range
+						}
+					}
+				  }
+			     }
+				}
+			  }
+		   }
+		}
+
+		$opt = 0
+		$existing_server_name = ""
+		foreach ( $obj in ( $server_obj_list.GetEnumerator() | Sort-Object Name ) )
+		{
+		    ( $server_name , $monitor_name , $param_name , $instance_name ) =  $obj.Name -Split ","
+
+			if ( $opt -ne 0 -and $server_name -ne $existing_server_name  )
+			{
+			    "             ]"                    | Add-Content -encoding ASCII $output_json
+				"}"                                 | Add-Content -encoding ASCII $output_json
+				$opt = 0
+			}
+			# else
+			# {
+			   # $opt = 1
+			# }
+
+		   if ( $opt -eq 0 )
+		   {
+			  "{"                                   | Add-Content -encoding ASCII $output_json
+			  "`"tool`": patrol" +  ","             | Add-Content -encoding ASCII $output_json
+			  "`"account_name`":"+ $acc_name +  ","   | Add-Content -encoding ASCII $output_json
+			  "`"server_name`":" + $server_name + ","	         | Add-Content -encoding ASCII $output_json
+			  "`"details`": ["                                   | Add-Content -encoding ASCII $output_json
+
+			  "`t`"{`""                                        | Add-Content -encoding ASCII $output_json
+			  "`t`t`"parameter_name`":" + $param_name + ","    | Add-Content -encoding ASCII $output_json
+			  "`t`t`"instance_name`":" + $instance_name + ","  | Add-Content -encoding ASCII $output_json
+			  "`t`t`"severity`":[ Warning,Alarm ],"            | Add-Content -encoding ASCII $output_json
+			  "`t`t`"threshold`":[ " + ( ( $obj ).Value ).Warning + "," + ( ( $obj ).Value ).Alarm + " ]" + ","	  | Add-Content -encoding ASCII $output_json
+			  "`t},"                                                                                              | Add-Content -encoding ASCII $output_json
+
+			  $opt = 1
+			  $existing_server_name = $server_name
+		   }
+		   else
+		   {
+			  "`t{"                                        | Add-Content -encoding ASCII $output_json
+			  "`t`t`"parameter_name`":" + $param_name + ","    | Add-Content -encoding ASCII $output_json
+			  "`t`t`"instance_name`":" + $instance_name + ","  | Add-Content -encoding ASCII $output_json
+			  "`t`t`"severity`":[ Warning,Alarm ],"            | Add-Content -encoding ASCII $output_json
+			  "`t`t`"threshold`":[ " + ( ( $obj ).Value ).Warning + "," + ( ( $obj ).Value ).Alarm + " ]" + ","	   | Add-Content -encoding ASCII $output_json
+			  "`t},"                                                                                               | Add-Content -encoding ASCII $output_json
+		   }
+		}
+		    "             ]"                    | Add-Content -encoding ASCII $output_json
+				"}"                                 | Add-Content -encoding ASCII $output_json
+}
