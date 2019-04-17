@@ -26,7 +26,7 @@ do
                     # Get userinformation from the user.
                     cls
                     $user = "test2.user"
-                    $pass = "tewaris2"
+                    $pass = ""
                     # Build auth header
                     $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
 
@@ -112,7 +112,7 @@ do
            } '2' {
                     cls
                     $user = "test2.user"
-                    $pass = "tewaris2"
+                    $pass = ""
                     # Build auth header
                     $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
 
@@ -185,7 +185,7 @@ do
            } '3' {
                     cls
                     $user = "test2.user"
-                    $pass = "tewaris2"
+                    $pass = ""
                     # Build auth header
                     $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
 
@@ -230,7 +230,7 @@ do
                                     #return $sys_id
 
                                     $user = "test2.user"
-                                    $pass = "tewaris2"
+                                    $pass = ""
                                     # Build auth header
                                     $HeaderAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
                                     $SNOWSessionHeader = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -284,7 +284,7 @@ do
             '4' {
                  cls
                     $user = "test2.user"
-                    $pass = "tewaris2"
+                    $pass = ""
                     # Build auth header
                     $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
 
@@ -329,7 +329,7 @@ do
                                     #return $sys_id
 
                                     $user = "test2.user"
-                                    $pass = "tewaris2"
+                                    $pass = ""
                                     # Build auth header
                                     $HeaderAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
                                     $SNOWSessionHeader = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
@@ -379,7 +379,7 @@ do
             '5' {
                     cls
                     $user = "test2.user"
-                    $pass = "tewaris2"
+                    $pass = ""
                     # Build auth header
                     $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
 
@@ -441,7 +441,7 @@ do
                                     #return $sys_id
 
                                     $user = "test2.user"
-                                    $pass = "tewaris2"
+                                    $pass = ""
                                     # Build auth header
                                     $HeaderAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $user, $pass)))
                                     $SNOWSessionHeader = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
